@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { getDocs, collection, getFirestore } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDYee48Df22MhFIqODrJ2lPfCuXittHKlg",
@@ -12,6 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const database = getFirestore(app);
 
 const logoutButton = document.getElementById('logout-button');
 
@@ -23,3 +26,20 @@ logoutButton.addEventListener('click', () => {
         console.error('Error logging out:', error);
     });
 });
+
+
+const downloadbutton = document.getElementById('download-button');
+if (downloadbutton) {
+    downloadbutton.addEventListener('click', async function() {
+        const querySnapshot = await getDocs(collection(database, 'registration'));
+        const users = querySnapshot.docs.map(doc => ({
+            ...doc.data()
+        }));
+        const filename = 'Details.xlsx';
+        const worksheet = XLSX.utils.json_to_sheet(users);
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Emails');
+        XLSX.writeFile(workbook, filename);
+    });
+}
